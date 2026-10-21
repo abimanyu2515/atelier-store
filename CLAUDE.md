@@ -31,7 +31,7 @@ npm run db:studio      # Drizzle Studio
 
 There is no test runner configured yet.
 
-Environment: copy `.env.example` to `.env.local`. Required: `DATABASE_URL` (Neon pooled URL), `BETTER_AUTH_SECRET` (`npx auth secret`), `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`. `src/db/index.ts` throws at import time if `DATABASE_URL` is missing, so build and the auth CLI both need it.
+Environment: copy `.env.example` to `.env.local`. Required: `DATABASE_URL` (Neon pooled URL), `BETTER_AUTH_SECRET` (`npx auth secret`), `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`. `src/db/index.ts` throws at import time if `DATABASE_URL` is missing, so build and the auth CLI both need it. `src/lib/auth-secret.ts` (called from `auth.ts`) makes production — including `next build` — refuse a missing or weak auth secret: it must be hex/base64 decoding to ≥32 bytes, from `npx auth secret` or `openssl rand -base64 32`. Outside production it only warns, so `auth:generate` still runs without one. Don't relax this check; Better Auth itself only warns, and a guessable secret allows forging verify-email tokens (account takeover).
 
 ## Architecture
 
