@@ -1,3 +1,5 @@
+import { NewsletterForm } from "@/components/newsletter-form";
+
 const columns = [
   {
     title: "Client services",
@@ -17,30 +19,7 @@ export function SiteFooter() {
   return (
     <footer className="theme-inverse">
       <div className="container-page grid gap-10 pt-16 pb-10 md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:pt-24">
-        <form className="flex max-w-sm flex-col gap-4 md:col-span-3 lg:col-span-1" action="#">
-          <h2 className="type-title">Sign up for updates</h2>
-          <p className="type-body text-muted-foreground">
-            New collections, private sales and invitations to atelier events, sent
-            twice a month.
-          </p>
-          <label htmlFor="footer-email" className="sr-only">
-            Email address
-          </label>
-          <div className="flex">
-            <input
-              id="footer-email"
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              placeholder="Email address"
-              className="field border-border"
-            />
-            <button type="submit" className="btn btn-secondary shrink-0 border-l-0">
-              Sign up
-            </button>
-          </div>
-        </form>
+        <NewsletterForm />
 
         {columns.map((column) => (
           <div key={column.title} className="flex flex-col gap-4">
