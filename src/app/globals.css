@@ -1,26 +1,577 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Atelier design system
+   Monochrome, square-edged, editorial. Imagery carries the color; UI stays
+   black / white / hairline grey with a single deep accent used sparingly.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Semantic tokens (runtime). Scoped overrides (e.g. .theme-inverse) swap
+   these, and every utility that reads them follows.
+   -------------------------------------------------------------------------- */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --surface: #f5f5f4; /* product image wells, quiet panels */
+  --surface-strong: #ebebea;
+  --muted-foreground: #6b6b6b;
+  --border: #e4e4e3; /* hairlines */
+  --border-strong: #0a0a0a; /* inputs, outlined buttons */
+  --accent: #5c1f24; /* oxblood: badges, emphasis — never large fills */
+  --accent-foreground: #ffffff;
+  --danger: #b3261e;
+  --success: #1f6b3a;
+
+  /* Layout rhythm — fluid by breakpoint */
+  --gutter: 1rem;
+  --section-y: 3rem;
+  --header-h: 3.5rem;
+  --grid-gap-x: 0.125rem;
+  --grid-gap-y: 2rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (width >= 48rem) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --gutter: 1.5rem;
+    --section-y: 4.5rem;
+    --grid-gap-y: 2.5rem;
   }
 }
 
-body {
-  background: var(--background);
+@media (width >= 64rem) {
+  :root {
+    --gutter: 2.5rem;
+    --section-y: 6rem;
+    --header-h: 4.5rem;
+    --grid-gap-x: 0.25rem;
+    --grid-gap-y: 3rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tailwind theme. Default color/font scales are reset so only the curated
+   palette and type scale exist as utilities.
+   -------------------------------------------------------------------------- */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-ink: #0a0a0a;
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f5f4;
+  --color-neutral-200: #ebebea;
+  --color-neutral-300: #e4e4e3;
+  --color-neutral-400: #c4c4c2;
+  --color-neutral-500: #8f8f8d;
+  --color-neutral-600: #6b6b6b;
+  --color-neutral-700: #474746;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #141414;
+
+  --font-*: initial;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Type scale: small, quiet UI text; large fluid display for editorial */
+  --text-*: initial;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.2;
+  --text-display-sm: clamp(2rem, 1.5rem + 2vw, 3rem);
+  --text-display-sm--line-height: 1.05;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display: clamp(2.5rem, 1.5rem + 4vw, 4.75rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.03em;
+  --text-display-xl: clamp(3rem, 1rem + 8vw, 8rem);
+  --text-display-xl--line-height: 0.95;
+  --text-display-xl--letter-spacing: -0.04em;
+
+  --tracking-tighter: -0.04em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.08em;
+  --tracking-widest: 0.14em;
+
+  --breakpoint-3xl: 120rem;
+
+  --container-page: 120rem; /* 1920px */
+  --container-narrow: 45rem; /* reading width */
+  --container-form: 28rem; /* auth / checkout forms */
+
+  --aspect-product: 4 / 5;
+  --aspect-portrait: 3 / 4;
+  --aspect-landscape: 3 / 2;
+  --aspect-hero: 16 / 9;
+
+  --ease-luxe: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Hero entrance: the one orchestrated moment on load */
+  --animate-settle: settle 2.4s var(--ease-luxe) both;
+  --animate-rise: rise 1.2s var(--ease-luxe) 0.5s both;
+
+  @keyframes settle {
+    from {
+      transform: scale(1.06);
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+  }
+}
+
+/* Semantic utilities that must follow scoped token overrides */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --spacing-gutter: var(--gutter);
+  --spacing-section: var(--section-y);
+  --spacing-header: var(--header-h);
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-padding-top: var(--header-h);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--foreground);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Typography roles
+   -------------------------------------------------------------------------- */
+@utility type-display-xl {
+  font-size: var(--text-display-xl);
+  line-height: var(--text-display-xl--line-height);
+  letter-spacing: var(--text-display-xl--letter-spacing);
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+@utility type-display {
+  font-size: var(--text-display);
+  line-height: var(--text-display--line-height);
+  letter-spacing: var(--text-display--letter-spacing);
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+@utility type-heading {
+  font-size: var(--text-display-sm);
+  line-height: var(--text-display-sm--line-height);
+  letter-spacing: var(--text-display-sm--letter-spacing);
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+@utility type-title {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 500;
+}
+
+@utility type-body {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  text-wrap: pretty;
+}
+
+@utility type-caption {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  color: var(--muted-foreground);
+}
+
+/* Small uppercase tracked label: nav, eyebrows, buttons, tags */
+@utility type-label {
+  font-size: var(--text-2xs);
+  line-height: var(--text-2xs--line-height);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@utility type-price {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Layout primitives
+   -------------------------------------------------------------------------- */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility container-narrow {
+  width: 100%;
+  max-width: calc(var(--container-narrow) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility container-form {
+  width: 100%;
+  max-width: calc(var(--container-form) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Break a child out of a container to the full viewport width */
+@utility bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+@utility section {
+  padding-block: var(--section-y);
+}
+
+/* Product listing: 2 → 3 → 4 columns, tight columns, generous rows */
+@utility product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--grid-gap-x);
+  row-gap: var(--grid-gap-y);
+
+  @variant md {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @variant lg {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Editorial 2-up: stacked on mobile, side by side from md */
+@utility editorial-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--grid-gap-x);
+
+  @variant md {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Full-viewport campaign hero; direct img/video children fill it */
+@utility hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 32rem;
+  height: calc(100svh - var(--header-h));
+  background-color: var(--surface);
+
+  & > img,
+  & > video,
+  & > picture {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+@utility hero-content {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: var(--section-y) var(--gutter);
+  text-align: center;
+  color: var(--color-white);
+}
+
+/* Image well for product tiles: neutral surface, slow hover zoom */
+@utility media-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--aspect-product);
+  background-color: var(--surface);
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms var(--ease-luxe);
+  }
+
+  @media (hover: hover) {
+    &:hover img {
+      transform: scale(1.03);
+    }
+  }
+}
+
+@utility site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* keeps the wordmark centered */
+  align-items: center;
+  height: var(--header-h);
+  padding-inline: var(--gutter);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+
+@utility divider {
+  height: 1px;
+  width: 100%;
+  background-color: var(--border);
+  border: 0;
+}
+
+/* Swap tokens for a dark editorial band */
+@utility theme-inverse {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --surface: #1a1a1a;
+  --surface-strong: #262626;
+  --muted-foreground: #a3a3a1;
+  --border: #333333;
+  --border-strong: #ffffff;
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons: square, 1px border, uppercase label, color inversion on hover
+   -------------------------------------------------------------------------- */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding-inline: 2rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-size: var(--text-2xs);
+  line-height: 1;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 200ms var(--ease-luxe),
+    color 200ms var(--ease-luxe),
+    border-color 200ms var(--ease-luxe);
+
+  &:disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+@utility btn-primary {
+  background-color: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+
+  &:hover {
+    background-color: transparent;
+    color: var(--foreground);
+  }
+}
+
+@utility btn-secondary {
+  background-color: transparent;
+  border-color: var(--border-strong);
+  color: var(--foreground);
+
+  &:hover {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+}
+
+/* For use over imagery */
+@utility btn-overlay {
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+  color: var(--color-ink);
+
+  &:hover {
+    background-color: transparent;
+    color: var(--color-white);
+  }
+}
+
+@utility btn-ghost {
+  min-height: auto;
+  padding-inline: 0;
+  background-color: transparent;
+  color: var(--foreground);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.5em;
+
+  &:hover {
+    text-decoration-color: transparent;
+  }
+}
+
+@utility btn-sm {
+  min-height: 2.5rem;
+  padding-inline: 1.25rem;
+}
+
+@utility btn-lg {
+  min-height: 3.5rem;
+  padding-inline: 2.75rem;
+}
+
+@utility btn-icon {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Links
+   -------------------------------------------------------------------------- */
+/* Inline text link: underlined at rest, underline fades on hover */
+@utility link {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: currentColor;
+  transition: text-decoration-color 200ms var(--ease-luxe);
+
+  &:hover {
+    text-decoration-color: transparent;
+  }
+}
+
+/* Navigation link: no underline at rest, line draws in on hover/active */
+@utility link-reveal {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 0.125rem;
+  transition: background-size 300ms var(--ease-luxe);
+
+  &:hover,
+  &:focus-visible,
+  &[aria-current="page"] {
+    background-size: 100% 1px;
+  }
+}
+
+@utility link-muted {
+  color: var(--muted-foreground);
+  transition: color 200ms var(--ease-luxe);
+
+  &:hover {
+    color: var(--foreground);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Form fields: square, 1px, ink border on focus. 16px text avoids iOS zoom.
+   -------------------------------------------------------------------------- */
+@utility field {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--surface-strong);
+  border-radius: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: var(--text-base);
+  transition: border-color 200ms var(--ease-luxe);
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+  &:hover {
+    border-color: var(--muted-foreground);
+  }
+  &:focus {
+    border-color: var(--border-strong);
+    outline: none;
+  }
+  &[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
 }
