@@ -131,7 +131,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/products/[slug]">, "p
             </dl>
 
             <div className="flex flex-col gap-4">
-              <PurchaseForm sizes={product.sizes} soldOut={stock.status === "sold-out"} />
+              <PurchaseForm slug={product.slug} sizes={product.sizes} soldOut={stock.status === "sold-out"} />
               <Link href="/#appointment" className="btn btn-secondary w-full">
                 Book an appointment to try it on
               </Link>

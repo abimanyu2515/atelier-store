@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { BagIcon, SearchIcon, UserIcon } from "@/components/icons";
+import { Suspense } from "react";
+import { BagLink, BagLinkView } from "@/components/bag-link";
+import { SearchIcon, UserIcon } from "@/components/icons";
 import { MobileMenu } from "@/components/mobile-menu";
 import { navigation } from "@/lib/catalog";
 
@@ -40,9 +42,9 @@ export function SiteHeader() {
           <Link href="/account" className="btn btn-icon" aria-label="Account">
             <UserIcon />
           </Link>
-          <a href="#" className="btn btn-icon" aria-label="Shopping bag, empty">
-            <BagIcon />
-          </a>
+          <Suspense fallback={<BagLinkView />}>
+            <BagLink />
+          </Suspense>
         </div>
       </header>
     </>

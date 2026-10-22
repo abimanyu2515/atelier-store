@@ -1,24 +1,39 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { addToCart, type AddToCartState } from "@/lib/cart-actions";
 import type { Product } from "@/lib/catalog";
 
 type Props = {
+  slug: string;
   sizes: Product["sizes"];
   soldOut: boolean;
 };
 
-export function PurchaseForm({ sizes, soldOut }: Props) {
+const initialState: AddToCartState = { status: "idle" };
+
+// Only the slug, size and quantity are posted; addToCart reads price and
+// stock itself, so `soldOut` here (from the cached catalog) is a hint only.
+export function PurchaseForm({ slug, sizes, soldOut }: Props) {
   const [size, setSize] = useState<string | null>(null);
   const [missingSize, setMissingSize] = useState(false);
+  const [state, formAction, pending] = useActionState(addToCart, initialState);
 
+  // Submitted from onSubmit rather than <form action>: React resets a form
+  // after its action runs, which would clear the checked size in the DOM
+  // while `size` state still holds it.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (sizes && !size) {
       setMissingSize(true);
       return;
     }
-    // The cart doesn't exist yet; adding to it goes here.
+    const formData = new FormData();
+    formData.set("slug", slug);
+    formData.set("quantity", "1");
+    if (size) formData.set("size", size);
+    startTransition(() => formAction(formData));
   }
 
   return (
@@ -64,9 +79,24 @@ export function PurchaseForm({ sizes, soldOut }: Props) {
         </fieldset>
       )}
 
-      <button type="submit" className="btn btn-primary btn-lg w-full" disabled={soldOut}>
-        {soldOut ? "Sold out" : "Add to bag"}
+      <button
+        type="submit"
+        className="btn btn-primary btn-lg w-full"
+        disabled={soldOut || pending}
+      >
+        {soldOut ? "Sold out" : pending ? "Adding…" : "Add to bag"}
       </button>
+      <p role="status" className="flex flex-wrap items-baseline justify-between gap-2 text-xs empty:hidden">
+        {state.status === "added" && (
+          <>
+            <span>{state.message}</span>
+            <Link href="/cart" className="link">
+              View bag
+            </Link>
+          </>
+        )}
+        {state.status === "error" && <span className="text-danger">{state.message}</span>}
+      </p>
     </form>
   );
 }

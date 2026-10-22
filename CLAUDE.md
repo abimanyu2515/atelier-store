@@ -44,6 +44,15 @@ Environment: copy `.env.example` to `.env.local`. Required: `DATABASE_URL` (Neon
 - **Roles**: `user.role` is `"customer"` (default) or `"admin"`, declared with `input: false` so no API body can set it. Grant admin with `npm run auth:make-admin -- <email>`. Non-admins get a 404 for `/admin*`, not a 403. Rate limiting uses `storage: "database"` and keys on a single-valued `x-forwarded-for`; behind a proxy chain other than Vercel, set `advanced.ipAddress`.
 - The Better Auth CLI is the `auth` npm package (pinned to the `better-auth` version); `@better-auth/cli` is deprecated. Don't add `import "server-only"` to `src/lib/auth.ts` or `src/db/index.ts` — the CLI loads those files outside Next and would fail.
 
+## Payments (Stripe)
+
+- Hosted Checkout Sessions with inline `price_data` built from `order_items`; no Stripe product catalog. Never take a price, total or payment status from the browser; `startCheckout` takes no input.
+- An order is `paid` only when Stripe's API reports the session `payment_status === "paid"`, via `syncCheckoutSession`. The webhook (`src/app/api/stripe/webhook/route.ts`) is the source of truth; the success page calls the same idempotent sync. Never mark an order paid from a URL or event payload alone.
+- Order status changes are compare-and-set (`where status in (…)`), so duplicate or concurrent webhook deliveries are harmless; `stripe_events` additionally skips known event ids.
+- Before releasing a pending order's stock, ask Stripe (`abandonOrder`): only an `expired` session, or none at all, may be released. `/api/cron/release-orders` (Bearer `CRON_SECRET`) is the backstop for missed webhooks.
+- `src/lib/orders.ts` never invalidates the cache itself (the success page calls it while rendering). Callers that reserve or release stock call `updateTag`/`revalidateTag("catalog", "max")`.
+- Local webhooks: `stripe listen --forward-to localhost:3000/api/stripe/webhook`, then set `STRIPE_WEBHOOK_SECRET`. Subscribe the endpoint to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `charge.refunded`.
+
 ## Database conventions
 
 - **Migrations are versioned.** Change the schema, run `db:generate -- --name <change>`, review the SQL, commit it under `drizzle/`, then `db:migrate`. Don't use `db:push` on the shared database.
@@ -52,4 +61,5 @@ Environment: copy `.env.example` to `.env.local`. Required: `DATABASE_URL` (Neon
 - **Pages never query `db` directly for catalog data.** They go through `src/db/queries/catalog.ts`. Those functions are `'use cache'` with `cacheTag("catalog")` and return the existing `Product`/`Category` types from `src/lib/catalog.ts`, so components stay database-agnostic.
 - **Every write to catalog or stock data must invalidate the cache**: `updateTag("catalog")` in a server action, `revalidateTag("catalog", "max")` elsewhere. Anything that decides availability (checkout, add-to-cart) must read stock uncached, never from the cached catalog. `src/proxy.ts` likewise checks slugs uncached.
 - **The build needs a migrated, seeded database.** With `cacheComponents`, `generateStaticParams` for `/products/[slug]` must return at least one slug. `db:seed` upserts by slug and is safe to re-run.
+- **Checkout reserves stock.** `reserveOrder` (`src/lib/orders.ts`) creates a `pending` order, snapshots `order_items` and decrements `product_stock` in one `db.batch`; the `quantity >= 0` check rejects oversell. Stock goes back only through `releaseOrder`, whose status compare-and-set makes a double restock impossible.
 - **Scripts that run outside Next** (`src/db/seed.ts` and similar, run with `tsx`) use relative imports, not `@/`. They call `loadEnvConfig(process.cwd())` before dynamically importing `./index`, because it throws at import time without `DATABASE_URL`.

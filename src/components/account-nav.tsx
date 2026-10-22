@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { signOut } from "@/lib/auth-actions";
 
 const links = [
   { href: "/account", label: "Overview" },
+  { href: "/account/orders", label: "Orders" },
   { href: "/account/details", label: "Account details" },
 ] as const;
+
+// Overview matches only itself; other sections stay current on their sub-pages.
+function isCurrent(pathname: string, href: string) {
+  return pathname === href || (href !== "/account" && pathname.startsWith(`${href}/`));
+}
 
 /**
  * Account section navigation: a scrollable tab row on small screens, a
@@ -16,20 +22,17 @@ const links = [
  * (e.g. the admin link) before sign-out.
  */
 export function AccountNav({ children }: { children?: ReactNode }) {
-  const pathname = usePathname();
-
   return (
     <nav aria-label="Account">
       <ul className="-mx-gutter flex gap-6 overflow-x-auto border-b px-gutter lg:mx-0 lg:flex-col lg:items-start lg:gap-4 lg:overflow-visible lg:border-b-0 lg:px-0">
         {links.map((link) => (
           <li key={link.href} className="shrink-0">
-            <Link
-              href={link.href}
-              aria-current={pathname === link.href ? "page" : undefined}
-              className="type-label link-reveal inline-block py-4 lg:py-0"
-            >
-              {link.label}
-            </Link>
+            {/* Under a dynamic route such as /account/orders/[id] the pathname
+                isn't known while prerendering, so usePathname suspends. The
+                fallback is the same link without the current-page state. */}
+            <Suspense fallback={<NavLink href={link.href} label={link.label} current={false} />}>
+              <CurrentNavLink href={link.href} label={link.label} />
+            </Suspense>
           </li>
         ))}
         {children}
@@ -43,6 +46,22 @@ export function AccountNav({ children }: { children?: ReactNode }) {
         </li>
       </ul>
     </nav>
+  );
+}
+
+function CurrentNavLink({ href, label }: { href: string; label: string }) {
+  return <NavLink href={href} label={label} current={isCurrent(usePathname(), href)} />;
+}
+
+function NavLink({ href, label, current }: { href: string; label: string; current: boolean }) {
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className="type-label link-reveal inline-block py-4 lg:py-0"
+    >
+      {label}
+    </Link>
   );
 }
 
