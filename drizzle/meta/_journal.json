@@ -15,6 +15,20 @@
       "when": 1792658292006,
       "tag": "0001_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792672659439,
+      "tag": "0002_cart",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792679578974,
+      "tag": "0003_orders",
+      "breakpoints": true
     }
   ]
 }

@@ -25,6 +25,11 @@
       "skillPath": "skills/check/SKILL.md",
       "computedHash": "59055fb74dd47dc1443cbdf970152d614e81372dd51aa636159eb3246a627dd8"
     },
+    "connect-recommend": {
+      "source": "docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "7f9386b43dab44012469ea6359ca13359ed0dbfb5510a9fc08d72f7dc7f42139"
+    },
     "create-auth": {
       "source": "better-auth/skills",
       "sourceType": "github",
@@ -54,6 +59,16 @@
       "sourceType": "github",
       "skillPath": "skills/scope/SKILL.md",
       "computedHash": "737c19451b3d0e08edf9560b195a864d1a4006e4f70760339ddc3b2d9b6b6447"
+    },
+    "stripe-best-practices": {
+      "source": "docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "671199d8bc7445ac6eaedabac838c562042476a8b353cb970bdfc6777bafebea"
+    },
+    "stripe-docs": {
+      "source": "docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "ee4a51d34f11386fe6c9f991d5b2d32da69c851124a78a01403412bcf87e73d7"
     },
     "sync": {
       "source": "jsmastery-pro/skills",

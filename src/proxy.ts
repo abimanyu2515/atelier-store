@@ -10,7 +10,12 @@ import { auth } from "@/lib/auth";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isUnder(pathname, "/account") || isUnder(pathname, "/admin")) {
+  if (
+    isUnder(pathname, "/account") ||
+    isUnder(pathname, "/admin") ||
+    isUnder(pathname, "/checkout") ||
+    pathname === "/cart"
+  ) {
     return guardProtected(request);
   }
   if (pathname === "/sign-in" || pathname === "/sign-up") {
@@ -97,6 +102,8 @@ export const config = {
     "/categories/:slug",
     "/account/:path*",
     "/admin/:path*",
+    "/cart",
+    "/checkout/:path*",
     "/sign-in",
     "/sign-up",
   ],

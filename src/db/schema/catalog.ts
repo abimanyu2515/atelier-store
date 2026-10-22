@@ -6,17 +6,9 @@ import {
   pgEnum,
   pgTable,
   text,
-  timestamp,
   unique,
 } from "drizzle-orm/pg-core";
-
-const timestamps = {
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-};
+import { timestamps } from "./columns";
 
 export const sizeSystem = pgEnum("size_system", ["EU", "IT"]);
 
