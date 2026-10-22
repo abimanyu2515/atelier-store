@@ -36,9 +36,10 @@ export function SiteHeader() {
           <Link href="/search" className="btn btn-icon hidden sm:inline-flex" aria-label="Search">
             <SearchIcon />
           </Link>
-          <a href="#" className="btn btn-icon" aria-label="Account">
+          {/* Static on purpose: src/proxy.ts sends signed-out visitors to sign-in */}
+          <Link href="/account" className="btn btn-icon" aria-label="Account">
             <UserIcon />
-          </a>
+          </Link>
           <a href="#" className="btn btn-icon" aria-label="Shopping bag, empty">
             <BagIcon />
           </a>

@@ -73,9 +73,9 @@ export function MobileMenu({ links }: Props) {
           <Link href="/search" className="link-muted" onClick={() => setOpen(false)}>
             Search
           </Link>
-          <a href="#" className="link-muted">
-            Sign in
-          </a>
+          <Link href="/account" className="link-muted" onClick={() => setOpen(false)}>
+            Account
+          </Link>
           <Link href="/#appointment" className="link-muted" onClick={() => setOpen(false)}>
             Book an appointment
           </Link>

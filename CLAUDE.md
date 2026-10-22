@@ -25,6 +25,7 @@ npm run auth:generate  # Better Auth CLI → writes Drizzle tables to src/db/sch
 npm run db:generate    # drizzle-kit: create SQL migrations in drizzle/
 npm run db:migrate     # apply migrations
 npm run db:seed        # upsert the sample catalog (src/db/seed-data.ts); safe to re-run
+npm run auth:make-admin -- <email>  # grant the admin role to an existing account
 npm run db:push        # push schema directly (scratch experiments only; see conventions)
 npm run db:studio      # Drizzle Studio
 ```
@@ -37,7 +38,10 @@ Environment: copy `.env.example` to `.env.local`. Required: `DATABASE_URL` (Neon
 
 - **Database**: `src/db/index.ts` exports a single Drizzle client (`db`) over Neon's HTTP driver (`drizzle-orm/neon-http`), built with `schema` from `src/db/schema/index.ts`. Every table file in `src/db/schema/` must be re-exported from that index — both the `db` client's relational queries and the Better Auth adapter depend on it. `drizzle.config.ts` loads env via `@next/env` so drizzle-kit sees the same `.env*` files as Next.
 - **Auth**: `src/lib/auth.ts` is the Better Auth server instance using `drizzleAdapter(db, { provider: "pg" })`. `nextCookies()` must remain the **last** plugin so server actions can set cookies. It's exposed at `src/app/api/auth/[...all]/route.ts` via `toNextJsHandler`. `src/lib/auth-client.ts` is the React client (`better-auth/react`).
-- **Schema workflow**: after changing Better Auth config (plugins, fields), run `auth:generate`, ensure `src/db/schema/index.ts` re-exports `./auth`, then `db:generate` + `db:migrate`. The auth tables are not generated yet; a "Missing tables" warning during build is expected until they are.
+- **Schema workflow**: after changing Better Auth config (plugins, fields), run `auth:generate` (writes `src/db/schema/auth.ts`; don't hand-edit it), then `db:generate` + `db:migrate`. A "Drizzle schema mismatch" error during `auth:generate` just means the DB is behind the config.
+- **Session reads go through `src/lib/session.ts`**: `getSession()`, `requireUser(returnTo)`, `requireAdmin()`. They are uncached on purpose (no `'use cache: private'`) so sign-out and role changes apply on the next request, and they must run inside `<Suspense>`. Every protected page **and every server action / route handler** calls `requireUser`/`requireAdmin` itself; `src/proxy.ts` gives early 307/404s for `/account*` and `/admin*` but is not the authorization boundary. The proxy is also where session cookies get refreshed (server components can't write cookies), so keep forwarding its `Set-Cookie`s.
+- **Sign-in/sign-up use `authClient` from the browser, not server actions.** Better Auth only rate-limits and origin-checks requests through `/api/auth/*`; `auth.api.signInEmail()` from a server action bypasses both. Post-auth redirects from `?next=` must go through `safeNext()` (`src/lib/safe-next.ts`).
+- **Roles**: `user.role` is `"customer"` (default) or `"admin"`, declared with `input: false` so no API body can set it. Grant admin with `npm run auth:make-admin -- <email>`. Non-admins get a 404 for `/admin*`, not a 403. Rate limiting uses `storage: "database"` and keys on a single-valued `x-forwarded-for`; behind a proxy chain other than Vercel, set `advanced.ipAddress`.
 - The Better Auth CLI is the `auth` npm package (pinned to the `better-auth` version); `@better-auth/cli` is deprecated. Don't add `import "server-only"` to `src/lib/auth.ts` or `src/db/index.ts` — the CLI loads those files outside Next and would fail.
 
 ## Database conventions
