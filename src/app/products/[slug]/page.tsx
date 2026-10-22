@@ -101,7 +101,7 @@ async function ProductDetails({ params }: Pick<PageProps<"/products/[slug]">, "p
                 </li>
                 <li aria-hidden="true">/</li>
                 <li>
-                  <Link href="/#categories" className="link-muted">
+                  <Link href={`/categories/${product.categorySlug}`} className="link-muted">
                     {product.category}
                   </Link>
                 </li>

@@ -10,6 +10,7 @@ export type Product = {
   slug: string;
   name: string;
   category: string;
+  categorySlug: string;
   price: number;
   color: string;
   description: string;
@@ -67,12 +68,12 @@ export function getStockState(stock: number): StockState {
 }
 
 export const navigation = [
-  { label: "New in", href: "/#new-in" },
+  { label: "New in", href: "/new-arrivals" },
   { label: "Women", href: "/#women" },
   { label: "Men", href: "/#men" },
-  { label: "Bags", href: "/#categories" },
-  { label: "Shoes", href: "/#categories" },
-  { label: "Jewelry", href: "/#categories" },
+  { label: "Bags", href: "/categories/bags" },
+  { label: "Shoes", href: "/categories/shoes" },
+  { label: "Jewelry", href: "/categories/jewelry" },
   { label: "Gifts", href: "/#new-in" },
 ];
 

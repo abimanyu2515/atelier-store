@@ -7,7 +7,7 @@ export default function NotFound() {
       <p className="type-body text-muted-foreground">
         The piece you’re looking for may have moved or is no longer in the collection.
       </p>
-      <Link href="/#new-in" className="btn btn-primary">
+      <Link href="/new-arrivals" className="btn btn-primary">
         Shop new arrivals
       </Link>
     </main>
