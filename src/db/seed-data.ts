@@ -11,6 +11,9 @@ export type SeedCategory = {
   alt?: string;
 };
 
+/** The category is linked by name; its slug comes from the database. */
+export type SeedProduct = Omit<Product, "categorySlug">;
+
 /** A zoomed crop of an Unsplash photo around a focal point (0–1) at `zoom`x. */
 function unsplashDetail(id: string, x: number, y: number, zoom: number) {
   return `${unsplash(id, 1200)}&crop=focalpoint&fp-x=${x}&fp-y=${y}&fp-z=${zoom}&h=1500`;
@@ -19,7 +22,7 @@ function unsplashDetail(id: string, x: number, y: number, zoom: number) {
 const shoeSizes = { system: "EU", values: ["36", "37", "38", "39", "40", "41"] } as const;
 const clothingSizes = { system: "IT", values: ["38", "40", "42", "44", "46"] } as const;
 
-export const products: Product[] = [
+export const products: SeedProduct[] = [
   {
     slug: "laguna-top-handle-bag",
     name: "Laguna top handle bag",

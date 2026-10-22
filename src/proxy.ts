@@ -1,13 +1,15 @@
 import { eq } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { products } from "@/db/schema";
+import { categories, products } from "@/db/schema";
 
-// Product pages stream their content behind Suspense, so a `notFound()` there
-// can only send a 200. Checking the slug here, before rendering starts, lets
-// unknown products return a real 404.
+// Product and category pages stream their content behind Suspense, so a
+// `notFound()` there can only send a 200. Checking the slug here, before
+// rendering starts, lets unknown products and categories return a real 404.
 export async function proxy(request: NextRequest) {
-  if (await productExists(slugFrom(request.nextUrl.pathname))) return;
+  const { pathname } = request.nextUrl;
+  const exists = pathname.startsWith("/categories/") ? categoryExists : productExists;
+  if (await exists(slugFrom(pathname))) return;
 
   // No route matches this path, so Next renders app/not-found.tsx with a 404.
   return NextResponse.rewrite(new URL("/404", request.url));
@@ -22,6 +24,15 @@ async function productExists(slug: string) {
   return row !== undefined;
 }
 
+async function categoryExists(slug: string) {
+  const [row] = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.slug, slug))
+    .limit(1);
+  return row !== undefined;
+}
+
 function slugFrom(pathname: string) {
   try {
     return decodeURIComponent(pathname.split("/")[2]);
@@ -31,5 +42,5 @@ function slugFrom(pathname: string) {
 }
 
 export const config = {
-  matcher: "/products/:slug",
+  matcher: ["/products/:slug", "/categories/:slug"],
 };

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
 import { getHomeCategories, getProducts } from "@/db/queries/catalog";
 import {
@@ -135,7 +136,7 @@ export default async function Home() {
         <ul className="-mx-gutter grid grid-cols-2 gap-x-(--grid-gap-x) gap-y-8 lg:mx-0 lg:grid-cols-4">
           {categories.map((category) => (
             <li key={category.slug}>
-              <a href="#" className="group flex flex-col gap-3">
+              <Link href={`/categories/${category.slug}`} className="group flex flex-col gap-3">
                 <div className="media-frame aspect-portrait">
                   <Image
                     src={category.image}
@@ -147,7 +148,7 @@ export default async function Home() {
                 <span className="type-title px-1 group-hover:underline group-hover:underline-offset-4 lg:px-0">
                   {category.name}
                 </span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

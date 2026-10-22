@@ -33,9 +33,9 @@ export function SiteHeader() {
         </Link>
 
         <div className="-mr-3 flex items-center justify-end">
-          <a href="#" className="btn btn-icon hidden sm:inline-flex" aria-label="Search">
+          <Link href="/search" className="btn btn-icon hidden sm:inline-flex" aria-label="Search">
             <SearchIcon />
-          </a>
+          </Link>
           <a href="#" className="btn btn-icon" aria-label="Account">
             <UserIcon />
           </a>

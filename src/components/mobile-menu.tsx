@@ -70,6 +70,9 @@ export function MobileMenu({ links }: Props) {
           </ul>
         </nav>
         <div className="flex flex-col gap-3 border-t px-gutter py-6">
+          <Link href="/search" className="link-muted" onClick={() => setOpen(false)}>
+            Search
+          </Link>
           <a href="#" className="link-muted">
             Sign in
           </a>
